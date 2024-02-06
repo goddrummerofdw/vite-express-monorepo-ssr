@@ -1,11 +1,10 @@
 import fs from 'node:fs/promises'
 import express from 'express'
-// Constants
+import 'dotenv/config'
 const isProduction = process.env.NODE_ENV === 'production'
 const port = process.env.PORT || 5173
 const base = process.env.BASE || '/'
 
-// Cached production assets
 const templateHtml = isProduction
   ? await fs.readFile('./dist/client/index.html', 'utf-8')
   : ''
@@ -13,10 +12,10 @@ const ssrManifest = isProduction
   ? await fs.readFile('./dist/client/.vite/ssr-manifest.json', 'utf-8')
   : undefined
 
-// Create http server
+
 const app = express()
-console.log(process.env.TEST, 'making sure that env works in prod')
-// Add Vite or respective production middlewares
+console.log(process.env.TEST)
+
 let vite: any;
 if (!isProduction) {
   const { createServer } = await import('vite')
@@ -33,8 +32,6 @@ if (!isProduction) {
   app.use(base, sirv('./dist/client', { extensions: [] }))
 }
 
-
-// Serve HTML
 app.get('/', async (req, res) => {
   try {
     const url = req.originalUrl.replace(base, '')
@@ -42,14 +39,13 @@ app.get('/', async (req, res) => {
     let template
     let render;
     if (!isProduction) {
-      // Always read fresh template in development
       template = await fs.readFile('./index.html', 'utf-8')
       template = await vite.transformIndexHtml(url, template)
       render = (await vite.ssrLoadModule('/src/client/entry-server.tsx')).render
     } else {
       template = templateHtml
       // @ts-ignore
-      render = (await import('./dist/server/entry-server.js')).render
+      render = (await import('./server/entry-server.js')).render
     }
 
     const rendered = await render(url, ssrManifest)
