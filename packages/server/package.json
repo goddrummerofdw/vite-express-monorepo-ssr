@@ -1,10 +1,10 @@
 {
-  "name": "vite-express-monorepo-ssr",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:server": "pnpm run --filter server dev"
+    "dev": "echo works"
   },
   "keywords": [],
   "author": "",
